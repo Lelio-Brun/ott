@@ -771,6 +771,7 @@ let pp_tex_BINDSPEC_PROD_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"bindspecprod
 let pp_tex_FIRST_LONG_PROD_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"firstlongprodline"
 let pp_tex_FIRST_PROD_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"firstprodline"
 let pp_tex_PROD_NEWLINE_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"prodnewline"
+let pp_tex_FIRST_PROD_NEWLINE_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"firstprodnewline"
 let pp_tex_INTERRULE_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"interrule"
 let pp_tex_AFTERLASTRULE_NAME m        = "\\"^pp_tex_NAME_PREFIX m^"afterlastrule"
 
@@ -2678,24 +2679,27 @@ and pp_rule m xd r = (* returns a string option *)
       else
         Some
 (* TODO: update the following to respect pp_tex_LONG_PROD_NAME (if necessary...) *)
-          (Str.replace_first 
-             (Str.regexp_string (pp_tex_PROD_NAME m))  
-             (pp_tex_FIRST_PROD_NAME m) 
-             ( "\\newcommand{"
-               ^ tex_rule_name m r.rule_ntr_name
-               ^ "}{\n"
-	       ^ (String.concat (pp_tex_PROD_NEWLINE_NAME m^"\n") 
-                    ( ( pp_tex_RULEHEAD_NAME m^"{"
-	                ^ String.concat  "  ,\\ "
-	                    (Auxl.remove_duplicates (List.map (function ntr,homs->pp_nontermroot m xd ntr) r.rule_ntr_names))
-	                ^ "}{::=}{" ^ pp_com ^ "}")
-                      ::
-	                (Auxl.option_map 
-                           (pp_prod m xd r.rule_ntr_name r.rule_pn_wrapper)
-                           r.rule_ps)))
-(*            ^"[5.0mm]" *)
-	       ^ "}\n"  ))
-  in 
+          (Str.replace_first
+             (Str.regexp_string (pp_tex_PROD_NEWLINE_NAME m))
+             (pp_tex_FIRST_PROD_NEWLINE_NAME m)
+             (Str.replace_first
+                (Str.regexp_string (pp_tex_PROD_NAME m))
+                (pp_tex_FIRST_PROD_NAME m)
+                ( "\\newcommand{"
+                  ^ tex_rule_name m r.rule_ntr_name
+                  ^ "}{\n"
+                  ^ (String.concat (pp_tex_PROD_NEWLINE_NAME m^"\n")
+                       ( ( pp_tex_RULEHEAD_NAME m^"{"
+                           ^ String.concat  "  ,\\ "
+                               (Auxl.remove_duplicates (List.map (function ntr,homs->pp_nontermroot m xd ntr) r.rule_ntr_names))
+                           ^ "}{::=}{" ^ pp_com ^ "}")
+                         ::
+                         (Auxl.option_map
+                            (pp_prod m xd r.rule_ntr_name r.rule_pn_wrapper)
+                            r.rule_ps)))
+                  (*            ^"[5.0mm]" *)
+                  ^ "}\n"  )))
+  in
   match result with
   | Some s -> Some (if !Global_option.output_source_locations >= 2 then "\n"^pp_source_location m r.rule_loc  ^ s else s)
   | None -> None
