@@ -236,8 +236,12 @@ let pp_drule fd (m:pp_mode) (xd:syntaxdefn) (dr:drule) : unit =
       Printf.fprintf fd "\\newcommand{%s}[1]{%s[#1]{%%\n"
         (Grammar_pp.tex_drule_name m dr.drule_name)
         (Grammar_pp.pp_tex_DRULE_NAME m);
-      List.iter
-        (fun p-> Printf.fprintf fd "%s{%s}%%\n" (Grammar_pp.pp_tex_PREMISE_NAME m) p)
+      let n = List.length (snd ppd_premises) in
+      List.iteri
+        (fun i p ->
+          Printf.fprintf fd "%s{%s}%%\n"
+            (if i = n - 1 then Grammar_pp.pp_tex_LAST_PREMISE_NAME m
+             else Grammar_pp.pp_tex_PREMISE_NAME m) p)
         (snd ppd_premises);
       output_string fd "}{\n";
       output_string fd ppd_conclusion;
